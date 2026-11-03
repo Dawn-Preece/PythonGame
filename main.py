@@ -5,15 +5,17 @@ import random
 # Variables and Constants ====================================================
 DELAY = 3
 
-loc = 'start'
-stage = 'house'
+loc = 'solved'
+stage = 'forest'
 active = True
 s1_time_start = time.perf_counter()
+timer = -1
 
 bedroom_key = False
 gate_key = False
 can_find_map = False
 has_map = False
+sticks = False
 
 shed_lock_uses = 0
 alt_stage = 0
@@ -32,10 +34,13 @@ notes = ''
 # Rooms and Subroutines ======================================================
 def choice (prompt): # not broken
     global notes
+    global stage
+    global bedroom_key
+    global gate_key
 
     b = True
     while b:
-        string = input (prompt)
+        string = input (prompt).strip ()
         if string:
             if string[0] == '/':
                 cmd = string.split(' ')
@@ -51,9 +56,20 @@ def choice (prompt): # not broken
                         print (notes)
                     else:
                         print ("You haven't written any notes yet.\n")
+                elif cmd[0] in ['/i', '/inv']:
+                    match stage:
+                        case 'house':
+                            if bedroom_key and not gate_key:
+                                print ('You have 1 key.')
+                            elif bedroom_key and gate_key:
+                                print ('You have 2 different keys.')
+                            else:
+                                print ('You have no items.')
+                        case 'forest':
+                            print ('This area has no items to collect.')
             else:
                 b = False
-    return string.strip().lower()
+    return string.lower ()
 
 def s1_room_start ():
     print ('An empty entrance room. Doors lead forwards, left and right. Stairs lead up.')
@@ -106,7 +122,7 @@ def s1_room_garden ():
                 if shed_lock_uses <= 2:
                     print ('It needs a 4-digit code.')
                     code = choice ('Enter the code, or "exit": ')
-                    while len(code) != 4 or not code.isdigit() or not code == 'exit':
+                    while (len(code) != 4 or not code.isdigit()) and not code == 'exit':
                         code = choice ('The code must be a 4-digit number or "exit": ')
                     if code == 'exit':
                         print ('You decide not to enter a code.')
@@ -223,6 +239,25 @@ def s1_room_kitchen ():
                 print ('You leave the kitchen.')
                 return 'start'
 def s1_func_start ():
+    global timer
+
+    difficulty = ''
+    while difficulty not in ['easy', 'medium', 'hard']:
+        difficulty = choice ('Select a difficulty (easy/medium/hard): ')
+    match difficulty:
+        case 'easy':
+            print ('Easy difficulty selected.')
+            timer = 420
+        case 'medium':
+            print ('Medium difficulty selected.')
+            timer = 300
+        case 'hard':
+            print ('Hard difficulty selected. Good luck.')
+            timer = 180
+        case _:
+            print ('Invalid difficulty. Defaulting to medium.')
+            timer = 300
+    
     print ("INFORMATION ==================")
     print (" - Your goal at each stage is provided.")
     print (" - If something tells you you're stuck, you're")
@@ -235,6 +270,7 @@ def s1_func_start ():
     print (" - Commands are available at every decision or input.")
     print (" - /n <text> (aliases /note, /notes) will add a line to the notepad.")
     print (" - /r (alias /read) will display the entire contents of the notepad.")
+    print (" - /i (alias /inv) will display any items you have collected.")
     print ("==============================")
     print ()
     print ("You wake up in an unfamiliar house.")
@@ -251,7 +287,7 @@ def s1_func_start ():
 
 def s2_room_start ():
     print ('The house is behind you, a forest stretches out in front.')
-    print ('There is no reason to go back.')
+    print ('The sound of rain on the trees is deafening.')
     while True:
         c = choice ('forward/search: ')
         match c:
@@ -288,6 +324,7 @@ def s2_room_centre ():
                     time.sleep (DELAY/1.5)
                     print (final_code)
                     can_find_map = False
+                    has_map = True
                 else:
                     s2_func_search()
 def s2_room_maze ():
@@ -333,14 +370,8 @@ def s2_room_maze ():
             time.sleep (DELAY)
             return 'solved'
 def s2_room_aftermaze ():
-    global active
-
-    print ('You find a small cave.')
-    time.sleep (DELAY/2)
-    print ('You should be safe from the storm here.')
-    time.sleep (DELAY/2)
-    print ('YOU WON THE GAME')
-    active = False
+    s3_func_start ()
+    return 'cave'
 def s2_func_start ():
     print('You escaped the house!')
     time.sleep(DELAY / 2)
@@ -371,6 +402,41 @@ def s2_func_search ():
             time.sleep(DELAY / 3)
             print("It runs away after noticing you.")
 
+def s3_room_start ():
+    global sticks
+
+    print ('The entrance of the cave.')
+    if not sticks:
+        print ('There are some dry sticks on the ground.')
+        print ('Collect the sticks or go deeper?')
+        while True:
+            c = choice ('collect/deeper: ')
+            match c:
+                case 'collect':
+                    print ('You collected all of the sticks.')
+                    sticks = True
+                    break
+                case 'deeper':
+                    print ('You go deeper into the cave.')
+                    return 'second_room'
+    print ('Go deeper?')
+    while True:
+        c = choice ('yes/no: ')
+        match c:
+            case 'y'|'yes':
+                return 'second_room'
+            case 'n'|'no':
+                print ('But there was nothing else to do.')
+                time.sleep (DELAY/3)
+                print ('Go deeper?')
+def s3_func_start ():
+    print ('You find a cave.')
+    time.sleep (DELAY/2)
+    print ('You should be safe from the storm here.')
+    time.sleep (DELAY/2)
+    print ("It's very cold. Find a way to warm up.")
+    print ()
+    print ('GOAL - START A FIRE')
 # ============================================================================
 
 s1_func_start ()
@@ -393,7 +459,7 @@ while active:
                     loc = 'start'
                 case _:
                     raise NotImplementedError ('This should be impossible.')
-            if time.perf_counter() - s1_time_start >= 420:
+            if time.perf_counter() - s1_time_start >= timer:
                 match loc:
                     case 'garden':
                         print ('You see people arriving.')
@@ -422,6 +488,18 @@ while active:
                     loc = s2_room_maze ()
                 case 'solved':
                     loc = s2_room_aftermaze ()
+                case 'cave':
+                    loc = 'start'
+                    stage = 'cave'
+                case _:
+                    raise NotImplementedError ('This should be impossible.')
+        case 'cave':
+            raise NotImplementedError ("\nThis area is currently under development.\nCongratulations on finishing the first 2 stages.")
+            match loc:
+                case 'start':
+                    loc = s3_room_start ()
+                case 'second_room':
+                    raise NotImplementedError ('Room does not exist: s3_room_second')
                 case _:
                     raise NotImplementedError ('This should be impossible.')
     print ()
