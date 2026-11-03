@@ -29,9 +29,9 @@ shed_code = [] # Random code
 for _ in range (4):
     shed_code.append (str(random.randint(0, 9)))
 
-final_code = ''
+forest_code = ''
 for _ in range (10):
-    final_code += random.choice(['^', 'v', '<', '>'])
+    forest_code += random.choice(['^', 'v', '<', '>'])
 
 notes = ''
 
@@ -232,7 +232,7 @@ def s1_room_kitchen ():
                 print ('After looking through every cupboard, you find a note.')
                 if alt_stage == 1:
                     time.sleep (DELAY)
-                    print (final_code)
+                    print (forest_code)
                     has_map = True
                     alt_stage = 2
                 elif alt_stage == 0:
@@ -328,7 +328,7 @@ def s2_room_centre ():
                 if can_find_map:
                     print ("There's a note on the ground.")
                     time.sleep (DELAY/1.5)
-                    print (final_code)
+                    print (forest_code)
                     can_find_map = False
                     has_map = True
                 else:
@@ -339,7 +339,7 @@ def s2_room_maze ():
 
     correct = 0
     while True:
-        next_dir = final_code[correct]
+        next_dir = forest_code[correct]
         c = choice ('forward/backward/left/right: ')
         match c:
             case 'forward'|'forwards':
