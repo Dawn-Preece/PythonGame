@@ -5,8 +5,8 @@ import random
 # Variables and Constants ====================================================
 DELAY = 3
 
-loc = 'solved'
-stage = 'forest'
+loc = 'start'
+stage = 'house'
 active = True
 s1_time_start = time.perf_counter()
 timer = -1
@@ -14,8 +14,12 @@ timer = -1
 bedroom_key = False
 gate_key = False
 can_find_map = False
+
 has_map = False
+
 sticks = False
+flint = False
+steel = False
 
 shed_lock_uses = 0
 alt_stage = 0
@@ -40,7 +44,7 @@ def choice (prompt): # not broken
 
     b = True
     while b:
-        string = input (prompt).strip ()
+        string = input (prompt).strip ().lower ()
         if string:
             if string[0] == '/':
                 cmd = string.split(' ')
@@ -67,9 +71,11 @@ def choice (prompt): # not broken
                                 print ('You have no items.')
                         case 'forest':
                             print ('This area has no items to collect.')
+                        case 'cave':
+                            print ('This area is unfinished, and does not yet have an inventory.')
             else:
                 b = False
-    return string.lower ()
+    return string
 
 def s1_room_start ():
     print ('An empty entrance room. Doors lead forwards, left and right. Stairs lead up.')
@@ -429,6 +435,41 @@ def s3_room_start ():
                 print ('But there was nothing else to do.')
                 time.sleep (DELAY/3)
                 print ('Go deeper?')
+def s3_room_secondchamber ():
+    global flint
+
+    print ('The cave widens out into a largs chamber.')
+    time.sleep (DELAY/3)
+    print ("It's very dark. You cannot see clearly.")
+    time.sleep (DELAY/3)
+    print ('Search the chamber or head back.')
+    while True:
+        c = choice ('search/back/forward: ')
+        match c:
+            case 'back'|'backward'|'backwards':
+                print ('You return to the light of the cave entrance.')
+                return 'start'
+            case 'forward'|'forwards':
+                print ("It's too dark.")
+                time.sleep (DELAY/3)
+                print ("You need a light source first.")
+            case 'search':
+                if not flint:
+                    print ('Looking around the room, you find some sharp stones.')
+                    time.sleep (DELAY/4)
+                    print ('Looks like flint.')
+                    time.sleep (DELAY/4)
+                    print ('Take one?')
+                    c2 = choice ('yes/no: ')
+                    if c2 in ['y', 'yes']:
+                        print ('You pick up a shard of flint.')
+                        flint = True
+                    else:
+                        print ('You choose not to pick up the flint.')
+                else:
+                    print ("Looking around, you don't see anything useful.")
+                    time.sleep (DELAY/4)
+                    print ("There's flint, but you already took some.")
 def s3_func_start ():
     print ('You find a cave.')
     time.sleep (DELAY/2)
@@ -499,7 +540,7 @@ while active:
                 case 'start':
                     loc = s3_room_start ()
                 case 'second_room':
-                    raise NotImplementedError ('Room does not exist: s3_room_second')
+                    loc = s3_room_secondchamber ()
                 case _:
                     raise NotImplementedError ('This should be impossible.')
     print ()
