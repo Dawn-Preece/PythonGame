@@ -1,6 +1,8 @@
 # Libraries ==================================================================
 import time
 import random
+import colorama
+colorama.init()
 
 # Variables and Constants ====================================================
 DELAY = 3
@@ -8,7 +10,6 @@ DELAY = 3
 loc = 'start'
 stage = 'house'
 active = True
-s1_time_start = time.perf_counter()
 timer = -1
 
 bedroom_key = False
@@ -30,7 +31,7 @@ for _ in range (4):
     shed_code.append (str(random.randint(0, 9)))
 
 forest_code = ''
-for _ in range (10):
+for _ in range (5):
     forest_code += random.choice(['^', 'v', '<', '>'])
 
 notes = ''
@@ -44,7 +45,7 @@ def choice (prompt): # not broken
 
     b = True
     while b:
-        string = input (prompt).strip ().lower ()
+        string = input (colorama.Fore.YELLOW + prompt + colorama.Style.RESET_ALL).strip ().lower ()
         if string:
             if string[0] == '/':
                 cmd = string.split(' ')
@@ -112,10 +113,15 @@ def s1_room_garden ():
                 print ('You return to the entrance hall.')
                 return 'start'
             case 'tree':
-                print ('You investigate the tree.')
-                time.sleep (DELAY / 4)
-                print ('And find a key!')
-                bedroom_key = True
+                if not bedroom_key:
+                    print ('You investigate the tree.')
+                    time.sleep (DELAY / 4)
+                    print ('And find a key!')
+                    bedroom_key = True
+                else:
+                    print ("You investigate the tree.")
+                    time.sleep (DELAY / 4)
+                    print ("There's nothing of use.")
             case 'gate':
                 if not bedroom_key and not gate_key:
                     print ('The gate is locked.')
@@ -186,7 +192,7 @@ def s1_room_hall ():
             case 'leave':
                 print ('You return down the stairs.')
                 return 'start'
-            case '3':
+            case '3'|'three':
                 if bedroom_key:
                     print ('You unlock the bedroom door.')
                     time.sleep (DELAY)
@@ -195,7 +201,7 @@ def s1_room_hall ():
                     print (shed_code[0] + '__' + shed_code[3])
                 else:
                     print ('The door is locked.')
-            case '2':
+            case '2'|'two':
                 if alt_stage == 2:
                     print ('You enter the room.')
                     time.sleep (DELAY)
@@ -216,11 +222,10 @@ def s1_room_hall ():
 
                 else:
                     print ('The door is locked.')
-            case '1':
+            case '1'|'one':
                 print ('The door is locked.')
 def s1_room_kitchen ():
     global alt_stage
-    global has_map
 
     print ('A small kitchen with cupboards hanging open.')
     time.sleep (DELAY/2)
@@ -232,8 +237,7 @@ def s1_room_kitchen ():
                 print ('After looking through every cupboard, you find a note.')
                 if alt_stage == 1:
                     time.sleep (DELAY)
-                    print (forest_code)
-                    has_map = True
+                    print ('There should be something here. It has not been implemented yet.')
                     alt_stage = 2
                 elif alt_stage == 0:
                     print ('_' + shed_code[1] + '__')
@@ -328,6 +332,10 @@ def s2_room_centre ():
                 if can_find_map:
                     print ("There's a note on the ground.")
                     time.sleep (DELAY/1.5)
+                    print ('It shows a drawing of the clearing, with an arrow pointing forward.')
+                    time.sleep (DELAY/3)
+                    print ("After that arrow, there's a list of other directions.")
+                    time.sleep (DELAY/3)
                     print (forest_code)
                     can_find_map = False
                     has_map = True
@@ -481,6 +489,7 @@ def s3_func_start ():
 # ============================================================================
 
 s1_func_start ()
+s1_time_start = time.perf_counter()
 while active:
     match stage:
         case 'house':
