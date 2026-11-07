@@ -14,13 +14,16 @@ timer = -1
 
 bedroom_key = False
 gate_key = False
-can_find_map = False
 
+can_find_map = False
 has_map = False
 
 sticks = False
 flint = False
 steel = False
+torch = False
+can_find_torch = False
+seen_skele = False
 
 shed_lock_uses = 0
 alt_stage = 0
@@ -445,6 +448,9 @@ def s3_room_start ():
                 print ('Go deeper?')
 def s3_room_secondchamber ():
     global flint
+    global torch
+    global can_find_torch
+    global seen_skele
 
     print ('The cave widens out into a largs chamber.')
     time.sleep (DELAY/3)
@@ -456,11 +462,17 @@ def s3_room_secondchamber ():
         match c:
             case 'back'|'backward'|'backwards':
                 print ('You return to the light of the cave entrance.')
+                if flint:
+                    can_find_torch = True
                 return 'start'
             case 'forward'|'forwards':
-                print ("It's too dark.")
-                time.sleep (DELAY/3)
-                print ("You need a light source first.")
+                if not torch:
+                    print ("It's too dark.")
+                    time.sleep (DELAY/3)
+                    print ("You need a light source first.")
+                else:
+                    print ('With the torch, you can proceed further.')
+                    return 'deep'
             case 'search':
                 if not flint:
                     print ('Looking around the room, you find some sharp stones.')
@@ -474,10 +486,28 @@ def s3_room_secondchamber ():
                         flint = True
                     else:
                         print ('You choose not to pick up the flint.')
-                else:
+                elif not can_find_torch:
                     print ("Looking around, you don't see anything useful.")
                     time.sleep (DELAY/4)
                     print ("There's flint, but you already took some.")
+                elif not seen_skele:
+                    print ("Looking around, you see something that wasn't there before...")
+                    time.sleep (DELAY)
+                    print ('A skeleton, seemingly of a caver...')
+                    time.sleep (DELAY)
+                    print ("There's a torch lying on the ground next to them.")
+                    time.sleep (DELAY/3)
+                    print ('Take it?')
+                    s3_func_torchpickup ()
+                else:
+                    print ("Looking around, you only see the skeleton.")
+                    if not torch:
+                        print ("There's a torch lying on the ground next to them.")
+                        time.sleep (DELAY/3)
+                        print ('Take it?')
+                        s3_func_torchpickup ()
+def s3_room_deep ():
+    raise NotImplementedError ('Room does not exist yet: s3_room_deep')
 def s3_func_start ():
     print ('You find a cave.')
     time.sleep (DELAY/2)
@@ -486,6 +516,20 @@ def s3_func_start ():
     print ("It's very cold. Find a way to warm up.")
     print ()
     print ('GOAL - START A FIRE')
+def s3_func_torchpickup ():
+    global torch
+
+    c = ''
+    while c not in ['yes', 'no', 'y', 'n']:
+        c = choice('yes/no: ')
+    match c:
+        case 'yes' | 'y':
+            print('You take the torch and turn it on.')
+            time.sleep(DELAY / 3)
+            print('It still has battery.')
+            torch = True
+        case 'no' | 'n':
+            print('You decide not to take the torch.')
 # ============================================================================
 
 s1_func_start ()
@@ -550,6 +594,8 @@ while active:
                     loc = s3_room_start ()
                 case 'second_room':
                     loc = s3_room_secondchamber ()
+                case 'deep':
+                    loc = s3_room_deep ()
                 case _:
                     raise NotImplementedError ('This should be impossible.')
     print ()
