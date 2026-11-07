@@ -381,7 +381,7 @@ def s2_room_maze ():
                     print ('You find yourself back at the clearing.')
                     maze_fails += 1
                     return 'centre'
-        if correct == 10:
+        if correct == len(forest_code):
             alt_stage = 4
             print ('...')
             time.sleep (DELAY)
