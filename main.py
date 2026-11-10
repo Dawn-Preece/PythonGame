@@ -40,7 +40,12 @@ for _ in range (5):
 notes = ''
 
 # Rooms and Subroutines ======================================================
-def choice (prompt): # not broken
+def choice (prompt: str) -> str: # not broken
+    """A more advanced version of the input() builtin with options to execute certain commands.\n
+    Valid commands:\n
+    /n <text> (aliases /note, /notes) will add a line to the notepad.\n
+    /r (alias /read) will display the entire contents of the notepad.\n
+    /i (alias /inv) will display any items you have collected for the current area."""
     global notes
     global stage
     global bedroom_key
@@ -80,20 +85,50 @@ def choice (prompt): # not broken
             else:
                 b = False
     return string
-def highlight (text: str, colour: str) -> str:
-    match colour.lower():
-        case 'g'|'green':
-            return colorama.Fore.GREEN + text + colorama.Style.RESET_ALL
-        case 'r'|'red':
-            return colorama.Fore.RED + text + colorama.Style.RESET_ALL
-        case 'y'|'yellow':
-            return colorama.Fore.YELLOW + text + colorama.Style.RESET_ALL
-        case 'b'|'blue':
-            return colorama.Fore.BLUE + text + colorama.Style.RESET_ALL
-        case 'c'|'cyan':
-            return colorama.Fore.CYAN + text + colorama.Style.RESET_ALL
-        case 'm'|'magenta':
-            return colorama.Fore.MAGENTA + text + colorama.Style.RESET_ALL
+def highlight (text: str, colour: str, light: bool = False) -> str:
+    """A simpler implementation of text colouring from colorama.\n
+    The text to be coloured and the colour must be specified.\n
+    Light colours are available through an optional 'light' boolean. Defaults to False.\n
+    Valid colour are red, green, blue, cyan, magenta, yellow.\n
+    Most colours accept just the initial letters or the full word (e.g. 'g' and 'green' both resolve to green highlighting)\n
+    The colour 'black' does not accept just the initial letter, as 'b' resolves to blue.\n
+    All colours are case-insensetive."""
+    if light:
+        match colour.lower():
+            case 'g'|'green':
+                return colorama.Fore.LIGHTGREEN_EX + text + colorama.Style.RESET_ALL
+            case 'r'|'red':
+                return colorama.Fore.LIGHTRED_EX + text + colorama.Style.RESET_ALL
+            case 'y'|'yellow':
+                return colorama.Fore.LIGHTYELLOW_EX + text + colorama.Style.RESET_ALL
+            case 'b'|'blue':
+                return colorama.Fore.LIGHTBLUE_EX + text + colorama.Style.RESET_ALL
+            case 'c'|'cyan':
+                return colorama.Fore.LIGHTCYAN_EX + text + colorama.Style.RESET_ALL
+            case 'm'|'magenta':
+                return colorama.Fore.LIGHTMAGENTA_EX + text + colorama.Style.RESET_ALL
+            case 'w'|'white':
+                return colorama.Fore.LIGHTWHITE_EX + text + colorama.Style.RESET_ALL
+            case 'black':
+                return colorama.Fore.LIGHTBLACK_EX + text + colorama.Style.RESET_ALL
+    else:
+        match colour.lower():
+            case 'g'|'green':
+                return colorama.Fore.GREEN + text + colorama.Style.RESET_ALL
+            case 'r'|'red':
+                return colorama.Fore.RED + text + colorama.Style.RESET_ALL
+            case 'y'|'yellow':
+                return colorama.Fore.YELLOW + text + colorama.Style.RESET_ALL
+            case 'b'|'blue':
+                return colorama.Fore.BLUE + text + colorama.Style.RESET_ALL
+            case 'c'|'cyan':
+                return colorama.Fore.CYAN + text + colorama.Style.RESET_ALL
+            case 'm'|'magenta':
+                return colorama.Fore.MAGENTA + text + colorama.Style.RESET_ALL
+            case 'w'|'white':
+                return colorama.Fore.WHITE + text + colorama.Style.RESET_ALL
+            case 'black':
+                return colorama.Fore.BLACK + text + colorama.Style.RESET_ALL
 
 def s1_room_start ():
     print ('An empty entrance room. Doors lead forwards, left and right. Stairs lead up.')
@@ -297,7 +332,7 @@ def s1_func_start ():
     print (" - Commands are available at every decision or input.")
     print (" - /n <text> (aliases /note, /notes) will add a line to the notepad.")
     print (" - /r (alias /read) will display the entire contents of the notepad.")
-    print (" - /i (alias /inv) will display any items you have collected.")
+    print (" - /i (alias /inv) will display any items you have collected for the current area.")
     print ("==============================")
     print ()
     print ("You wake up in an unfamiliar house.")
