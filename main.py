@@ -48,7 +48,7 @@ def choice (prompt): # not broken
 
     b = True
     while b:
-        string = input (colorama.Fore.YELLOW + prompt + colorama.Style.RESET_ALL).strip ().lower ()
+        string = input (highlight(prompt, 'yellow')).strip ().lower ()
         if string:
             if string[0] == '/':
                 cmd = string.split(' ')
@@ -56,30 +56,44 @@ def choice (prompt): # not broken
                 if cmd[0] in ['/n', '/note', '/notes']:
                     if len (cmd) > 1:
                         notes += ' '.join(cmd[1:]) + '\n'
-                        print ('Added a line to the notepad.')
+                        print (highlight('Added a line to the notepad.', 'b'))
                     else:
-                        print ('You must specify text to write to the notepad.')
+                        print (highlight('You must specify text to write to the notepad.', 'b'))
                 elif cmd[0] in ['/r', '/read']:
                     if notes:
-                        print (notes)
+                        print (highlight(notes, 'b'))
                     else:
-                        print ("You haven't written any notes yet.\n")
+                        print (highlight("You haven't written any notes yet.", 'b'))
                 elif cmd[0] in ['/i', '/inv']:
                     match stage:
                         case 'house':
                             if bedroom_key and not gate_key:
-                                print ('You have 1 key.')
+                                print (highlight('You have 1 key.', 'b'))
                             elif bedroom_key and gate_key:
-                                print ('You have 2 different keys.')
+                                print (highlight('You have 2 different keys.', 'b'))
                             else:
-                                print ('You have no items.')
+                                print (highlight('You have no items.', 'b'))
                         case 'forest':
-                            print ('This area has no items to collect.')
+                            print (highlight('This area has no items to collect.', 'b'))
                         case 'cave':
-                            print ('This area is unfinished, and does not yet have an inventory.')
+                            print (highlight('This area is unfinished, and does not yet have an inventory.', 'b'))
             else:
                 b = False
     return string
+def highlight (text: str, colour: str) -> str:
+    match colour.lower():
+        case 'g'|'green':
+            return colorama.Fore.GREEN + text + colorama.Style.RESET_ALL
+        case 'r'|'red':
+            return colorama.Fore.RED + text + colorama.Style.RESET_ALL
+        case 'y'|'yellow':
+            return colorama.Fore.YELLOW + text + colorama.Style.RESET_ALL
+        case 'b'|'blue':
+            return colorama.Fore.BLUE + text + colorama.Style.RESET_ALL
+        case 'c'|'cyan':
+            return colorama.Fore.CYAN + text + colorama.Style.RESET_ALL
+        case 'm'|'magenta':
+            return colorama.Fore.MAGENTA + text + colorama.Style.RESET_ALL
 
 def s1_room_start ():
     print ('An empty entrance room. Doors lead forwards, left and right. Stairs lead up.')
@@ -119,7 +133,7 @@ def s1_room_garden ():
                 if not bedroom_key:
                     print ('You investigate the tree.')
                     time.sleep (DELAY / 4)
-                    print ('And find a key!')
+                    print (highlight('And find a key!', 'g'))
                     bedroom_key = True
                 else:
                     print ("You investigate the tree.")
@@ -144,7 +158,7 @@ def s1_room_garden ():
                     elif code == ''.join(shed_code):
                         print ('The door unlocks!')
                         time.sleep (DELAY)
-                        print ('You found a key inside!')
+                        print (highlight('You found a key inside!', 'g'))
                         gate_key = True
                     else:
                         print ("But it wasn't the right code.")
@@ -177,7 +191,7 @@ def s1_room_dining ():
         match c:
             case 'y'|'yes':
                 print ('Investigating further, you find a note on the table.')
-                print ('__' + shed_code[2] + '_')
+                print (highlight('__' + shed_code[2] + '_', 'g'))
                 print ("There's nothing else in the room.")
                 return 'start'
             case 'n'|'no':
@@ -201,7 +215,7 @@ def s1_room_hall ():
                     time.sleep (DELAY)
                     print ('There is a note on the bed.')
                     time.sleep (DELAY)
-                    print (shed_code[0] + '__' + shed_code[3])
+                    print (highlight(shed_code[0] + '__' + shed_code[3], 'g'))
                 else:
                     print ('The door is locked.')
             case '2'|'two':
@@ -243,7 +257,7 @@ def s1_room_kitchen ():
                     print ('There should be something here. It has not been implemented yet.')
                     alt_stage = 2
                 elif alt_stage == 0:
-                    print ('_' + shed_code[1] + '__')
+                    print (highlight('_' + shed_code[1] + '__', 'g'))
                 else:
                     print ('You saw this already.')
                 print ("There's nothing else in the room.")
@@ -339,7 +353,7 @@ def s2_room_centre ():
                     time.sleep (DELAY/3)
                     print ("After that arrow, there's a list of other directions.")
                     time.sleep (DELAY/3)
-                    print (forest_code)
+                    print (highlight(forest_code, 'g'))
                     can_find_map = False
                     has_map = True
                 else:
@@ -430,7 +444,7 @@ def s3_room_start ():
             c = choice ('collect/deeper: ')
             match c:
                 case 'collect':
-                    print ('You collected all of the sticks.')
+                    print (highlight('You collected all of the sticks.', 'g'))
                     sticks = True
                     break
                 case 'deeper':
@@ -482,7 +496,7 @@ def s3_room_secondchamber ():
                     print ('Take one?')
                     c2 = choice ('yes/no: ')
                     if c2 in ['y', 'yes']:
-                        print ('You pick up a shard of flint.')
+                        print (highlight('You pick up a shard of flint.', 'g'))
                         flint = True
                     else:
                         print ('You choose not to pick up the flint.')
@@ -524,9 +538,9 @@ def s3_func_torchpickup ():
         c = choice('yes/no: ')
     match c:
         case 'yes' | 'y':
-            print('You take the torch and turn it on.')
+            print(highlight('You take the torch and turn it on.', 'g'))
             time.sleep(DELAY / 3)
-            print('It still has battery.')
+            print(highlight('It still has battery.', 'g'))
             torch = True
         case 'no' | 'n':
             print('You decide not to take the torch.')
