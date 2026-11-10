@@ -41,7 +41,8 @@ notes = ''
 
 # Rooms and Subroutines ======================================================
 def choice (prompt: str) -> str: # not broken
-    """A more advanced version of the input() builtin with options to execute certain commands.\n
+    """A more advanced version of the input() builtin with options to execute certain commands.
+    Prompts default to yellow highlighting, but can be overridden by passing in highlighted text.\n
     Valid commands:\n
     /n <text> (aliases /note, /notes) will add a line to the notepad.\n
     /r (alias /read) will display the entire contents of the notepad.\n
@@ -316,9 +317,6 @@ def s1_func_start ():
         case 'hard':
             print ('Hard difficulty selected. Good luck.')
             timer = 180
-        case _:
-            print ('Invalid difficulty. Defaulting to medium.')
-            timer = 300
     
     print ("INFORMATION ==================")
     print (" - Your goal at each stage is provided.")
